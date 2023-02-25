@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "673794838343",
+    "project_id": "tracker-kdan",
+    "storage_bucket": "tracker-kdan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:673794838343:android:df48edbc3f00078b060662",
+        "android_client_info": {
+          "package_name": "com.kdan.tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "673794838343-37jkuqf446g2lepnf5dpmdh50pfdp8fs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kdan.tracker",
+            "certificate_hash": "156f80effd77f3f6ba9e8a9db3518450fede3f01"
+          }
+        },
+        {
+          "client_id": "673794838343-es937kbnre7auo2subtuj7vodljclklb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBP2SZlbNYNdOnvy5OskzDW_YQ6Xi0rxSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "673794838343-es937kbnre7auo2subtuj7vodljclklb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

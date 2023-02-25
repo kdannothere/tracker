@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Authorization</string>
+    <string name="hint_email">Email address</string>
+    <string name="hint_password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="sign_up">Sign up</string>
+    <string name="submit">SUBMIT</string>
+    <string name="have_no_account">Don`t have an account?</string>
+    <string name="back_to_sign_in">Back to Sign In</string>
+    <string name="message_try_again">Try again.</string>
+    <string name="message_sign_in">Sign in, please</string>
+    <string name="message_success">Success!</string>
+    <string name="message_failure">Failure.</string>
+    <string name="message_email_blank">Email address is blank</string>
+    <string name="message_password_blank">Password is blank</string>
+    <string name="message_rule_email">Email address should be in format:
+        firstname.lastname@domain.tld</string>
+    <string name="message_rule_password">Password should contain:
+    at least 1 digit, at least 1 lower case letter, at least 1 upper case letter,
+        at least 1 special character, no white spaces, from 8 to 20 characters.
+    </string>
+</resources>
