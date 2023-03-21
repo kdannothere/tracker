@@ -1,9 +1,11 @@
 package com.kdan.tracker.screen
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -14,8 +16,11 @@ import androidx.navigation.NavHostController
 import com.kdan.authorization.AuthViewModel
 import com.kdan.authorization.RoutesAuth
 import com.kdan.tracker.R
-import com.kdan.tracker.data.TrackerViewModel
-import com.kdan.tracker.data.Status
+import com.kdan.tracker.TrackerViewModel
+import com.kdan.tracker.database.MarkDao
+import com.kdan.tracker.utility.Status
+import com.kdan.tracker.utility.Utility
+import kotlinx.coroutines.coroutineScope
 
 @Composable
 fun ViewTracker(

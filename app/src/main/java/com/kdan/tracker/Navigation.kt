@@ -1,6 +1,7 @@
 package com.kdan.tracker
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -15,6 +16,7 @@ import com.kdan.authorization.RoutesAuth
 import com.kdan.authorization.screens.ViewRestorePassword
 import com.kdan.authorization.screens.ViewSignIn
 import com.kdan.authorization.screens.ViewSignUp
+import com.kdan.tracker.database.MarkDao
 import com.kdan.tracker.screen.ViewTracker
 
 @Composable
@@ -23,6 +25,7 @@ fun Navigation(
     applicationContext: Context,
     viewModel: AuthViewModel = viewModel(),
 ) {
+
     Surface(modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background) {
         NavHost(
@@ -34,7 +37,7 @@ fun Navigation(
             composable(route = Routes.ViewTracker) {
                 ViewTracker(
                     navController,
-                    applicationContext
+                    applicationContext,
                 )
             }
             composable(route = RoutesAuth.ViewSignIn) {

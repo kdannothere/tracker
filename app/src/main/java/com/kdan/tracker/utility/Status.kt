@@ -1,4 +1,4 @@
-package com.kdan.tracker.data
+package com.kdan.tracker.utility
 
 enum class Status {
     TRACKER_IS_OFF,
