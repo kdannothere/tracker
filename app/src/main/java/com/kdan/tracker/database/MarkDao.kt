@@ -14,4 +14,7 @@ interface MarkDao {
 
     @Delete
     suspend fun deleteMark(mark: Mark)
+
+    @Query("SELECT * FROM local_marks")
+    fun getAllMarks(): List<Mark>
 }

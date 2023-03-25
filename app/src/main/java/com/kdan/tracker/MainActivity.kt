@@ -2,17 +2,21 @@ package com.kdan.tracker
 
 import android.Manifest
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import com.kdan.tracker.database.TrackerDatabase
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.kdan.tracker.ui.theme.TrackerTheme
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

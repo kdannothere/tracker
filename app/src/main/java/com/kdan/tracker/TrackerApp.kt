@@ -1,36 +1,26 @@
 package com.kdan.tracker
 
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import com.kdan.tracker.utility.Status
-import com.kdan.tracker.domain.LocationService
-import com.kdan.tracker.utility.Utility
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import java.util.concurrent.TimeUnit
 
 class TrackerApp: Application() {
 
+    private lateinit var requestSendLocation: WorkRequest
+
     companion object {
-        const val CHANNEL_ID = "location"
-        const val CHANNEL_NAME = "Location"
+        const val CHANNEL_ID = "tracker"
+        const val CHANNEL_NAME = "Tracker"
     }
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        requestSendLocation = PeriodicWorkRequestBuilder<WorkerSendLocation>(
+            BuildConfig.PERIOD, TimeUnit.MILLISECONDS
+        ).build()
+        WorkManager.getInstance(applicationContext).enqueue(requestSendLocation)
     }
 
-    private fun createNotificationChannel() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
 }
