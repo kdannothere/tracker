@@ -1,7 +1,6 @@
-package com.kdan.tracker
+package com.kdan.tracker.navigation
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -11,18 +10,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.kdan.authorization.AuthViewModel
-import com.kdan.authorization.RoutesAuth
-import com.kdan.authorization.screens.ViewRestorePassword
-import com.kdan.authorization.screens.ViewSignIn
-import com.kdan.authorization.screens.ViewSignUp
-import com.kdan.tracker.database.MarkDao
-import com.kdan.tracker.screen.ViewTracker
+import com.kdan.authorization.viewmodel.AuthViewModel
+import com.kdan.authorization.navigation.RoutesAuth
+import com.kdan.authorization.screen.FragmentRestorePassword
+import com.kdan.authorization.screen.FragmentSignIn
+import com.kdan.authorization.screen.FragmentSignUp
+import com.kdan.tracker.MainActivity
+import com.kdan.tracker.screen.FragmentTracker
 
 @Composable
 fun Navigation(
     navController: NavHostController,
     applicationContext: Context,
+    activity: MainActivity,
     viewModel: AuthViewModel = viewModel(),
 ) {
 
@@ -31,38 +31,35 @@ fun Navigation(
         NavHost(
             navController = navController,
             startDestination = if (viewModel.isUserLoggedIn) {
-                Routes.ViewTracker
-            } else RoutesAuth.ViewSignIn
+                Route.FragmentTracker
+            } else RoutesAuth.FragmentSignIn
         ) {
-            composable(route = Routes.ViewTracker) {
-                ViewTracker(
+            composable(route = Route.FragmentTracker) {
+                FragmentTracker(
                     navController,
                     applicationContext,
+                    activity
                 )
             }
-            composable(route = RoutesAuth.ViewSignIn) {
-                ViewSignIn(
+            composable(route = RoutesAuth.FragmentSignIn) {
+                FragmentSignIn(
                     navController,
                     applicationContext,
-                    routeToTracker = Routes.ViewTracker
+                    routeToTracker = Route.FragmentTracker
                 )
             }
-            composable(route = RoutesAuth.ViewSignUp) {
-                ViewSignUp(
+            composable(route = RoutesAuth.FragmentSignUp) {
+                FragmentSignUp(
                     navController,
                     applicationContext
                 )
             }
-            composable(route = RoutesAuth.ViewRestorePassword) {
-                ViewRestorePassword(
+            composable(route = RoutesAuth.FragmentRestorePassword) {
+                FragmentRestorePassword(
                     navController,
                     applicationContext
                 )
             }
         }
     }
-}
-
-object Routes {
-    const val ViewTracker = "ViewTracker"
 }

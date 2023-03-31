@@ -69,6 +69,7 @@ class LocationService : Service() {
             .getLocationUpdates(interval = BuildConfig.PERIOD)
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
+                //Log.d("SHOW", "location")
                 val mark = Mark(
                     latitude = location.latitude.toString(),
                     longitude = location.longitude.toString(),

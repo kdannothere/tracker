@@ -1,4 +1,4 @@
-package com.kdan.authorization
+package com.kdan.authorization.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

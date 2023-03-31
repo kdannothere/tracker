@@ -4,16 +4,11 @@
     <string name="state_no_permissions">TRACKER HAS NO PERMISSIONS</string>
     <string name="state_gps_off">GPS IS OFF</string>
     <string name="state_loading">TRACKER COLLECTS LOCATIONS</string>
-    <string name="tracker_cant_collect">Tracker can`t collect locations</string>
     <string name="button_start">START</string>
     <string name="button_stop">STOP</string>
     <string name="button_log_out">Log Out</string>
-    <string name="button_map">Map</string>
-    <string name="button_coarse_permission">Coarse location permission</string>
-    <string name="button_fine_permission">Fine location permission</string>
-    <string name="button_background_permission">Background location permission</string>
-    <string name="button_check_all">Check if all permissions are granted</string>
-    <string name="dialog_text">These permissions are important for this app to work correctly.
-        Please grant all of them to work ALL THE TIME.</string>
-    <string name="dialog_title">Permissions</string>
+    <string name="dialog_title">Message</string>
+    <string name="dialog_text">Tracker won`t work without permissions. Give them, please.</string>
+    <string name="dialog_text_button_okay">Okay</string>
+    <string name="dialog_text_button_give">Give permissions</string>
 </resources>

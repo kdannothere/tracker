@@ -1,22 +1,24 @@
-package com.kdan.authorization.screens
+package com.kdan.authorization.screen
 
 import android.content.Context
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kdan.authorization.AuthViewModel
+import com.kdan.authorization.R
+import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.utility.Utility
 
 @Composable
-fun Alert(
+fun ShowAlertDialog(
     viewModel: AuthViewModel = viewModel(),
     context: Context,
 ) {
     AlertDialog(
         title = {
-            Text(text = "Messages")
+            Text(text = stringResource(id = R.string.dialog_title))
         },
         text = {
             Text(Utility.getMessages(context, viewModel.messageCodes)
@@ -28,7 +30,7 @@ fun Alert(
                 Utility.turnOffDialog(viewModel.showDialog)
                 Utility.clearMessageCodes(viewModel.messageCodes)
             }) {
-                Text("Okay")
+                Text(stringResource(id = R.string.dialog_text_button_okay))
             }
         }
 

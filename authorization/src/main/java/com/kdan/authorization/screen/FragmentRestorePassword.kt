@@ -1,4 +1,4 @@
-package com.kdan.authorization.screens
+package com.kdan.authorization.screen
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
@@ -17,22 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.kdan.authorization.AuthViewModel
+import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.R.string
-import com.kdan.authorization.RoutesAuth
+import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ViewSignIn(
+fun FragmentRestorePassword(
     navController: NavHostController,
     context: Context,
-    routeToTracker: String? = null,
     viewModel: AuthViewModel = viewModel(),
 ) {
     val email = remember { mutableStateOf(TextFieldValue("")) }
-    val password = remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val keyboard = LocalSoftwareKeyboardController.current
@@ -52,10 +50,8 @@ fun ViewSignIn(
                 TextField(
                     value = email.value,
                     onValueChange = {
-                        run {
-                            email.value = it
-                            viewModel.email = email.value.text
-                        }
+                        email.value = it
+                        viewModel.email = email.value.text
                     },
                     singleLine = true,
                     placeholder = { Text(stringResource(string.hint_email)) },
@@ -65,94 +61,54 @@ fun ViewSignIn(
                         }
                     )
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                TextField(
-                    value = password.value,
-                    onValueChange = {
-                        run {
-                            password.value = it
-                            viewModel.password = password.value.text
-                        }
-                    },
-                    singleLine = true,
-                    placeholder = { Text(stringResource(string.hint_password)) },
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            keyboard?.hide()
-                        }
-                    )
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    TextButton(
-                        modifier = Modifier.align(Alignment.End),
-                        onClick = { navController.navigate(RoutesAuth.ViewRestorePassword) }) {
-                        Text(text = stringResource(id = string.forgot_password))
-                    }
+                if (viewModel.showDialog.value) {
+                    ShowAlertDialog(context = context)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(
                     onClick = {
                         scope.launch {
-                            signIn(
+                            restorePassword(
                                 auth = viewModel.auth,
-                                navHostController = navController,
                                 email = viewModel.email,
-                                password = viewModel.password,
                                 showDialog = viewModel.showDialog,
-                                messageCodes = viewModel.messageCodes,
-                                routeToTracker = routeToTracker
+                                messageCodes = viewModel.messageCodes
                             )
                             keyboard?.hide()
                         }
                     }) {
-                    Text(text = stringResource(id = string.sign_in))
-                }
-                if (viewModel.showDialog.value) {
-                    Alert(context = context)
+                    Text(text = stringResource(id = string.submit))
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                TextButton(onClick = {
-                    navController.navigate(RoutesAuth.ViewSignUp)
-                }) {
-                    Column {
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            text = stringResource(id = string.have_no_account))
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            text = stringResource(id = string.sign_up))
-                    }
+                TextButton(
+                    onClick = {
+                        navController.navigate(RoutesAuth.FragmentSignIn)
+                    }) {
+                    Text(text = stringResource(id = string.back_to_sign_in))
                 }
             }
         }
     }
 }
 
-private fun signIn(
+private fun restorePassword(
     auth: FirebaseAuth,
-    navHostController: NavHostController,
     email: String,
-    password: String,
     showDialog: MutableState<Boolean>,
     messageCodes: MutableList<Int>,
-    routeToTracker: String?,
 ) {
     val isEmailOkay = Utility.checkEmail(email, messageCodes)
-    val isPasswordOkay = Utility.checkPassword(password, messageCodes)
-    if (!isEmailOkay || !isPasswordOkay) {
+    if (!isEmailOkay) {
         Utility.turnOnDialog(showDialog)
         return
     }
-    auth.signInWithEmailAndPassword(email, password)
+    auth.sendPasswordResetEmail(email)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val route = routeToTracker ?: RoutesAuth.ViewWelcome
-                navHostController.navigate(route)
+                Utility.addMessageCode(string.message_success, messageCodes)
             } else {
                 Utility.addMessageCode(string.message_failure, messageCodes)
-                Utility.turnOnDialog(showDialog)
             }
+            Utility.turnOnDialog(showDialog)
         }
 }

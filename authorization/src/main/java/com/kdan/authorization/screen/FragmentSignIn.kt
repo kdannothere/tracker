@@ -1,4 +1,4 @@
-package com.kdan.authorization.screens
+package com.kdan.authorization.screen
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
@@ -17,21 +17,21 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.kdan.authorization.AuthViewModel
+import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.R.string
-import com.kdan.authorization.RoutesAuth
+import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ViewSignUp(
+fun FragmentSignIn(
     navController: NavHostController,
     context: Context,
+    routeToTracker: String,
     viewModel: AuthViewModel = viewModel(),
 ) {
-    val emailState = remember { mutableStateOf(TextFieldValue("")) }
+    val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -45,20 +45,16 @@ fun ViewSignUp(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.CenterVertically)
                 .fillMaxSize()
                 .padding(horizontal = 30.dp)
         ) {
             item {
-                Text(text = "Registration")
-                Spacer(modifier = Modifier.height(20.dp))
                 TextField(
-                    value = emailState.value,
+                    value = email.value,
                     onValueChange = {
                         run {
-                            emailState.value = it
-                            viewModel.email = emailState.value.text
+                            email.value = it
+                            viewModel.email = email.value.text
                         }
                     },
                     singleLine = true,
@@ -86,43 +82,62 @@ fun ViewSignUp(
                         }
                     )
                 )
-                if (viewModel.showDialog.value) {
-                    Alert(context = context)
-                }
-                Spacer(modifier = Modifier.height(40.dp))
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            signUp(
-                                auth = viewModel.auth,
-                                email = viewModel.email,
-                                password = viewModel.password,
-                                showDialog = viewModel.showDialog,
-                                messageCodes = viewModel.messageCodes
-                            )
-                            keyboard?.hide()
-                        }
-                    }) {
-                    Text(text = stringResource(id = string.sign_up))
+                Spacer(modifier = Modifier.height(20.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    TextButton(
+                        modifier = Modifier.align(Alignment.End),
+                        onClick = { navController.navigate(RoutesAuth.FragmentRestorePassword) }) {
+                        Text(text = stringResource(id = string.forgot_password))
+                    }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(
                     onClick = {
-                        navController.navigate(RoutesAuth.ViewSignIn)
+                        scope.launch {
+                            signIn(
+                                auth = viewModel.auth,
+                                navHostController = navController,
+                                email = viewModel.email,
+                                password = viewModel.password,
+                                showDialog = viewModel.showDialog,
+                                messageCodes = viewModel.messageCodes,
+                                routeToTracker = routeToTracker
+                            )
+                            keyboard?.hide()
+                        }
                     }) {
-                    Text(text = stringResource(id = string.back_to_sign_in))
+                    Text(text = stringResource(id = string.sign_in))
+                }
+                if (viewModel.showDialog.value) {
+                    ShowAlertDialog(context = context)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                TextButton(onClick = {
+                    navController.navigate(RoutesAuth.FragmentSignUp)
+                }) {
+                    Column {
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            text = stringResource(id = string.have_no_account))
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            text = stringResource(id = string.sign_up))
+                    }
                 }
             }
         }
     }
 }
 
-private fun signUp(
+private fun signIn(
     auth: FirebaseAuth,
+    navHostController: NavHostController,
     email: String,
     password: String,
     showDialog: MutableState<Boolean>,
     messageCodes: MutableList<Int>,
+    routeToTracker: String,
 ) {
     val isEmailOkay = Utility.checkEmail(email, messageCodes)
     val isPasswordOkay = Utility.checkPassword(password, messageCodes)
@@ -130,13 +145,13 @@ private fun signUp(
         Utility.turnOnDialog(showDialog)
         return
     }
-    auth.createUserWithEmailAndPassword(email, password)
+    auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Utility.addMessageCode(string.message_success, messageCodes)
+                navHostController.navigate(routeToTracker)
             } else {
                 Utility.addMessageCode(string.message_failure, messageCodes)
+                Utility.turnOnDialog(showDialog)
             }
-            Utility.turnOnDialog(showDialog)
         }
 }

@@ -1,11 +1,9 @@
 package com.kdan.tracker.screen
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -13,42 +11,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.kdan.authorization.AuthViewModel
-import com.kdan.authorization.RoutesAuth
+import com.kdan.authorization.navigation.RoutesAuth
+import com.kdan.authorization.viewmodel.AuthViewModel
+import com.kdan.tracker.MainActivity
 import com.kdan.tracker.R
-import com.kdan.tracker.TrackerViewModel
-import com.kdan.tracker.database.MarkDao
+import com.kdan.tracker.TrackerApp
+import com.kdan.tracker.domain.ControlService
+import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
-import com.kdan.tracker.utility.Utility
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun ViewTracker(
+fun FragmentTracker(
     navController: NavHostController,
     applicationContext: Context,
-    trackerViewModel: TrackerViewModel = viewModel(),
+    activity: MainActivity,
     authViewModel: AuthViewModel = viewModel(),
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colors.background) {
+        color = MaterialTheme.colors.background
+    ) {
+        if (TrackerApp.showAlertDialog.value) ShowAlertDialog(activity)
         Row(
             horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Top) {
+            verticalAlignment = Alignment.Top
+        ) {
             TextButton(onClick = {
-                trackerViewModel.stopTracker(applicationContext)
+                ControlService.stopTracking(applicationContext)
                 authViewModel.logOut()
-                navController.navigate(RoutesAuth.ViewSignIn)
+                navController.navigate(RoutesAuth.FragmentSignIn)
             }) {
-                Text(text = stringResource(id = R.string.button_log_out),
-                    fontSize = 20.sp)
+                Text(
+                    text = stringResource(id = R.string.button_log_out),
+                    fontSize = 20.sp
+                )
             }
         }
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ShowStatusText(trackerViewModel.status)
+            ShowStatusText()
             Spacer(modifier = Modifier.height(30.dp))
             ButtonStartStop(applicationContext)
         }
@@ -56,10 +61,8 @@ fun ViewTracker(
 }
 
 @Composable
-private fun ShowStatusText(
-    status: Status,
-) {
-    val textToShow = when (status) {
+private fun ShowStatusText() {
+    val textToShow = when (CurrentStatus.status.value) {
         Status.TRACKER_IS_OFF -> {
             stringResource(id = R.string.state_tracker_off)
         }
@@ -72,9 +75,6 @@ private fun ShowStatusText(
         Status.LOADING -> {
             stringResource(id = R.string.state_loading)
         }
-        Status.ERROR -> {
-            stringResource(id = R.string.tracker_cant_collect)
-        }
     }
     Text(text = textToShow)
 }
@@ -82,18 +82,36 @@ private fun ShowStatusText(
 @Composable
 private fun ButtonStartStop(
     applicationContext: Context,
-    viewModel: TrackerViewModel = viewModel(),
 ) {
-    val textOfButton = if (viewModel.status == Status.TRACKER_IS_OFF) {
+    val textOfButton = if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
+        CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS) {
         stringResource(id = R.string.button_start)
     } else {
         stringResource(id = R.string.button_stop)
     }
     Button(
         onClick = {
-            viewModel.startTracker(applicationContext)
+            runTracker(applicationContext)
         }) {
-        Text(text = textOfButton,
-            fontSize = 20.sp)
+        Text(
+            text = textOfButton,
+            fontSize = 20.sp
+        )
+    }
+}
+
+fun runTracker(context: Context) {
+    if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
+        CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
+    ) {
+        GlobalScope.launch {
+            CurrentStatus.setNewStatus(Status.LOADING)
+            ControlService.startTracking(context)
+        }
+    } else {
+        GlobalScope.launch {
+            CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
+            ControlService.stopTracking(context)
+        }
     }
 }

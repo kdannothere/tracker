@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Authorization</string>
     <string name="hint_email">Email address</string>
     <string name="hint_password">Password</string>
     <string name="forgot_password">Forgot password?</string>
@@ -8,6 +7,8 @@
     <string name="submit">SUBMIT</string>
     <string name="have_no_account">Don`t have an account?</string>
     <string name="back_to_sign_in">Back to Sign In</string>
+    <string name="dialog_title">Messages</string>
+    <string name="dialog_text_button_okay">Okay</string>
     <string name="message_try_again">Try again.</string>
     <string name="message_sign_in">Sign in, please</string>
     <string name="message_success">Success!</string>

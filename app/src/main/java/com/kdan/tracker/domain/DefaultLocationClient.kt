@@ -7,7 +7,9 @@ import android.location.LocationManager
 import android.os.Looper
 import com.google.android.gms.location.*
 import com.kdan.tracker.BuildConfig
-import com.kdan.tracker.utility.hasLocationPermission
+import com.kdan.tracker.utility.CurrentStatus
+import com.kdan.tracker.utility.Status
+import com.kdan.tracker.utility.Utility
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -23,27 +25,25 @@ class DefaultLocationClient(
     @SuppressLint("MissingPermission")
     override fun getLocationUpdates(interval: Long): Flow<Location> {
         return callbackFlow {
-            if (!context.hasLocationPermission()) {
+
+            if (!Utility.hasLocationPermission(context)) {
+                CurrentStatus.setNewStatus(Status.HAS_NO_PERMISSIONS)
                 throw LocationClient.LocationException("Missing location permission")
             }
-
             val locationManager =
                 context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            val isNetworkEnabled =
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-            if (!isGpsEnabled && !isNetworkEnabled) {
+            if (!Utility.checkGps(locationManager)) {
+                CurrentStatus.setNewStatus(Status.GPS_IS_OFF)
                 throw LocationClient.LocationException("GPS is disabled")
             }
-
             val request = createRequest()
-
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult) {
                     super.onLocationResult(result)
-                    result.locations.lastOrNull()?.let { location ->
-                        launch { send(location) }
-                    }
+                    val location = result.locations.lastOrNull()
+                    if (location == null) {
+                        ControlService.stopTracking(context)
+                    } else launch { send(location) }
                 }
             }
 
