@@ -26,6 +26,7 @@ class TrackerApp: Application() {
         const val CHANNEL_ID = "tracker"
         const val CHANNEL_NAME = "Tracker"
         val showAlertDialog = mutableStateOf(false)
+        var email = ""
     }
 
     override fun onCreate() {

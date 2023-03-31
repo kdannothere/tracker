@@ -29,6 +29,7 @@ fun FragmentTracker(
     activity: MainActivity,
     authViewModel: AuthViewModel = viewModel(),
 ) {
+    TrackerApp.email = authViewModel.getUserEmail()
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background

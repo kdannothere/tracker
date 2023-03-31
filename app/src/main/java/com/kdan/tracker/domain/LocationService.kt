@@ -69,11 +69,11 @@ class LocationService : Service() {
             .getLocationUpdates(interval = BuildConfig.PERIOD)
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
-                //Log.d("SHOW", "location")
                 val mark = Mark(
+                    time = location.time.toString(),
+                    email = TrackerApp.email,
                     latitude = location.latitude.toString(),
                     longitude = location.longitude.toString(),
-                    time = location.time.toString(),
                     //dateAndTime = Utility.dateTimeFormat.format(location.time)
                 )
                 remoteDb.collection("remote_marks")

@@ -16,4 +16,8 @@ class AuthViewModel : ViewModel() {
     val showDialog = mutableStateOf(false)
 
     fun logOut() = run { auth.signOut() }
+
+    fun getUserEmail(): String {
+        return auth.currentUser?.email ?: "null"
+    }
 }

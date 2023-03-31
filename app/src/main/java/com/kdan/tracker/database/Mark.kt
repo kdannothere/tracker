@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "local_marks")
 data class Mark(
-@PrimaryKey(autoGenerate = true) val id: Int = 0,
+@PrimaryKey val time: String,
+@NonNull @ColumnInfo val email: String,
 @NonNull @ColumnInfo val latitude: String,
 @NonNull @ColumnInfo val longitude: String,
-@NonNull @ColumnInfo val time: String,
 )
