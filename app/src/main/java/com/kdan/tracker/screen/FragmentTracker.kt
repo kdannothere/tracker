@@ -41,7 +41,7 @@ fun FragmentTracker(
             TextButton(onClick = {
                 ControlService.stopTracking(applicationContext)
                 authViewModel.logOut()
-                navController.navigate(RoutesAuth.FragmentSignIn)
+                navController.navigate(RoutesAuth.fragmentSignIn)
             }) {
                 Text(
                     text = stringResource(id = R.string.button_log_out),

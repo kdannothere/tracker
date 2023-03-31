@@ -82,7 +82,7 @@ fun FragmentRestorePassword(
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(
                     onClick = {
-                        navController.navigate(RoutesAuth.FragmentSignIn)
+                        navController.navigate(RoutesAuth.fragmentSignIn)
                     }) {
                     Text(text = stringResource(id = string.back_to_sign_in))
                 }

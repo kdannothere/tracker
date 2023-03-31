@@ -31,30 +31,30 @@ fun Navigation(
         NavHost(
             navController = navController,
             startDestination = if (viewModel.isUserLoggedIn) {
-                Route.FragmentTracker
-            } else RoutesAuth.FragmentSignIn
+                Route.fragmentTracker
+            } else RoutesAuth.fragmentSignIn
         ) {
-            composable(route = Route.FragmentTracker) {
+            composable(route = Route.fragmentTracker) {
                 FragmentTracker(
                     navController,
                     applicationContext,
                     activity
                 )
             }
-            composable(route = RoutesAuth.FragmentSignIn) {
+            composable(route = RoutesAuth.fragmentSignIn) {
                 FragmentSignIn(
                     navController,
                     applicationContext,
-                    routeToTracker = Route.FragmentTracker
+                    routeToTracker = Route.fragmentTracker
                 )
             }
-            composable(route = RoutesAuth.FragmentSignUp) {
+            composable(route = RoutesAuth.fragmentSignUp) {
                 FragmentSignUp(
                     navController,
                     applicationContext
                 )
             }
-            composable(route = RoutesAuth.FragmentRestorePassword) {
+            composable(route = RoutesAuth.fragmentRestorePassword) {
                 FragmentRestorePassword(
                     navController,
                     applicationContext

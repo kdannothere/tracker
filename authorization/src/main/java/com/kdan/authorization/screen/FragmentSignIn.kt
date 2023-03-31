@@ -86,7 +86,7 @@ fun FragmentSignIn(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     TextButton(
                         modifier = Modifier.align(Alignment.End),
-                        onClick = { navController.navigate(RoutesAuth.FragmentRestorePassword) }) {
+                        onClick = { navController.navigate(RoutesAuth.fragmentRestorePassword) }) {
                         Text(text = stringResource(id = string.forgot_password))
                     }
                 }
@@ -113,7 +113,7 @@ fun FragmentSignIn(
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(onClick = {
-                    navController.navigate(RoutesAuth.FragmentSignUp)
+                    navController.navigate(RoutesAuth.fragmentSignUp)
                 }) {
                     Column {
                         Text(
