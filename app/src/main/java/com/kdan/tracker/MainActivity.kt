@@ -7,10 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kdan.tracker.navigation.Navigation
 import com.kdan.tracker.ui.theme.TrackerTheme
 
-
 class MainActivity : ComponentActivity() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

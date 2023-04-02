@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Mark::class], version = 1)
+@Database(entities = [Mark::class], version = 2)
 abstract class TrackerDatabase : RoomDatabase() {
 
     abstract val dao: MarkDao
@@ -26,7 +26,9 @@ abstract class TrackerDatabase : RoomDatabase() {
                     context.applicationContext,
                     TrackerDatabase::class.java,
                     "local_marks"
-                ).build()
+                )
+                    .fallbackToDestructiveMigrationFrom(1)
+                    .build()
                 INSTANCE = instance
                 return instance
             }
