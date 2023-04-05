@@ -1,5 +1,5 @@
 package com.kdan.tracker.navigation
 
-object Route {
+object RouteTracker {
     const val fragmentTracker = "FragmentTracker"
 }

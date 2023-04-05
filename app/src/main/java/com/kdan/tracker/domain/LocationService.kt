@@ -1,5 +1,6 @@
 package com.kdan.tracker.domain
 
+import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -94,6 +95,14 @@ class LocationService : Service() {
             notificationManager.createNotificationChannel(channel)
         }
         startForeground(1, notification.build())
+
+        val sharedPref = applicationContext.getSharedPreferences(
+            "trackerPref", Application.MODE_PRIVATE
+        )
+        sharedPref.edit().apply {
+            putString("status", "on")
+            apply()
+        }
     }
 
     private fun stop() {
@@ -101,6 +110,14 @@ class LocationService : Service() {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else stopForeground(true)
         stopSelf()
+
+        val sharedPref = applicationContext.getSharedPreferences(
+            "trackerPref", Application.MODE_PRIVATE
+        )
+        sharedPref.edit().apply {
+            putString("status", "off")
+            apply()
+        }
     }
 
     override fun onDestroy() {

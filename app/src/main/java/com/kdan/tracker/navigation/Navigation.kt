@@ -31,10 +31,10 @@ fun Navigation(
         NavHost(
             navController = navController,
             startDestination = if (viewModel.isUserLoggedIn) {
-                Route.fragmentTracker
+                RouteTracker.fragmentTracker
             } else RoutesAuth.fragmentSignIn
         ) {
-            composable(route = Route.fragmentTracker) {
+            composable(route = RouteTracker.fragmentTracker) {
                 FragmentTracker(
                     navController,
                     applicationContext,
@@ -45,7 +45,7 @@ fun Navigation(
                 FragmentSignIn(
                     navController,
                     applicationContext,
-                    routeToTracker = Route.fragmentTracker
+                    routeToTracker = RouteTracker.fragmentTracker
                 )
             }
             composable(route = RoutesAuth.fragmentSignUp) {

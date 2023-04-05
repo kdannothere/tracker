@@ -1,5 +1,6 @@
 package com.kdan.tracker.screen
 
+import android.app.Application
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -30,6 +31,11 @@ fun FragmentTracker(
     authViewModel: AuthViewModel = viewModel(),
 ) {
     TrackerApp.email = authViewModel.getUserEmail()
+    val sharedPref = applicationContext.getSharedPreferences("trackerPref", Application.MODE_PRIVATE)
+    sharedPref.edit().apply {
+        putString("email", authViewModel.getUserEmail())
+        apply()
+    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background

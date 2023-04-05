@@ -31,6 +31,13 @@ class TrackerApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        val sharedPref = getSharedPreferences("trackerPref", MODE_PRIVATE)
+        email = sharedPref.getString("email", null).toString()
+        val status = sharedPref.getString("status", null).toString()
+        if (status == "on") {
+            CurrentStatus.setNewStatus(Status.LOADING)
+            ControlService.startTracking(applicationContext)
+        }
         requestSendLocation = PeriodicWorkRequestBuilder<WorkerSendLocation>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.HOURS
