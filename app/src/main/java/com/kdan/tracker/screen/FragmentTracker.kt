@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.viewmodel.AuthViewModel
@@ -28,7 +28,7 @@ fun FragmentTracker(
     navController: NavHostController,
     applicationContext: Context,
     activity: MainActivity,
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     TrackerApp.email = authViewModel.getUserEmail()
     val sharedPref = applicationContext.getSharedPreferences("trackerPref", Application.MODE_PRIVATE)

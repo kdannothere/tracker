@@ -13,8 +13,10 @@ import com.kdan.tracker.domain.ControlService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import com.kdan.tracker.utility.Utility
+import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 
+@HiltAndroidApp
 class TrackerApp: Application() {
 
     private lateinit var requestSendLocation: WorkRequest
