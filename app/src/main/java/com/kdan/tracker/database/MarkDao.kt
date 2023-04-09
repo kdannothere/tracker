@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MarkDao {
@@ -15,6 +14,6 @@ interface MarkDao {
     @Delete
     suspend fun deleteMark(mark: Mark)
 
-    @Query("SELECT * FROM local_marks")
+    @Query("SELECT * FROM ${TrackerDatabase.dbName}")
     fun getAllMarks(): List<Mark>
 }

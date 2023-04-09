@@ -42,7 +42,7 @@ class DefaultLocationClient(
                     super.onLocationResult(result)
                     val location = result.locations.lastOrNull()
                     if (location == null) {
-                        ControlService.stopTracking(context)
+                        LocationService.stopTracking(context)
                     } else launch { send(location) }
                 }
             }

@@ -128,5 +128,19 @@ class LocationService : Service() {
     companion object {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
+
+        fun startTracking(applicationContext: Context) {
+            Intent(applicationContext, LocationService::class.java).apply {
+                action = ACTION_START
+                applicationContext.startService(this)
+            }
+        }
+
+        fun stopTracking(applicationContext: Context) {
+            Intent(applicationContext, LocationService::class.java).apply {
+                action = ACTION_STOP
+                applicationContext.startService(this)
+            }
+        }
     }
 }

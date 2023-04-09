@@ -17,7 +17,7 @@ import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.tracker.MainActivity
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
-import com.kdan.tracker.domain.ControlService
+import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import kotlinx.coroutines.GlobalScope
@@ -46,7 +46,7 @@ fun FragmentTracker(
             verticalAlignment = Alignment.Top
         ) {
             TextButton(onClick = {
-                ControlService.stopTracking(applicationContext)
+                LocationService.stopTracking(applicationContext)
                 authViewModel.logOut()
                 navController.navigate(RoutesAuth.fragmentSignIn)
             }) {
@@ -113,12 +113,12 @@ fun runTracker(context: Context) {
     ) {
         GlobalScope.launch {
             CurrentStatus.setNewStatus(Status.LOADING)
-            ControlService.startTracking(context)
+            LocationService.startTracking(context)
         }
     } else {
         GlobalScope.launch {
             CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
-            ControlService.stopTracking(context)
+            LocationService.stopTracking(context)
         }
     }
 }

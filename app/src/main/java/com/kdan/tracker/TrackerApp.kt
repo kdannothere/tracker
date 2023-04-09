@@ -9,7 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.kdan.tracker.domain.ControlService
+import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import com.kdan.tracker.utility.Utility
@@ -38,7 +38,7 @@ class TrackerApp: Application() {
         val status = sharedPref.getString("status", null).toString()
         if (status == "on") {
             CurrentStatus.setNewStatus(Status.LOADING)
-            ControlService.startTracking(applicationContext)
+            LocationService.startTracking(applicationContext)
         }
         requestSendLocation = PeriodicWorkRequestBuilder<WorkerSendLocation>(
             repeatInterval = 1,
@@ -71,10 +71,10 @@ class TrackerApp: Application() {
                     if (showAlertDialog.value) return@Runnable
                     if (!Utility.hasLocationPermission(applicationContext)) {
                         showAlertDialog.value = true
-                        ControlService.stopTracking(applicationContext)
+                        LocationService.stopTracking(applicationContext)
                     } else {
                         CurrentStatus.setNewStatus(Status.LOADING)
-                        ControlService.startTracking(applicationContext)
+                        LocationService.startTracking(applicationContext)
                     }
                 }
                 else -> {
