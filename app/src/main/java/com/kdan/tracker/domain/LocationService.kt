@@ -19,6 +19,7 @@ import com.kdan.tracker.database.mark.Mark
 import com.kdan.tracker.database.mark.MarkDatabase
 import com.kdan.tracker.database.user_data.UserData
 import com.kdan.tracker.database.user_data.UserDatabase
+import com.kdan.tracker.utility.CurrentStatus
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -32,7 +33,6 @@ class LocationService : Service() {
     private lateinit var localDb: MarkDatabase
     private lateinit var userDataDb: UserDatabase
     private lateinit var locationClient: LocationClient
-
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -112,6 +112,10 @@ class LocationService : Service() {
         stopSelf()
 
         GlobalScope.launch {
+            if (CurrentStatus.isLoggingOut) {
+                TrackerApp.email = ""
+                CurrentStatus.isLoggingOut = false
+            }
             userDataDb.dao.upsertUserData(UserData(email = TrackerApp.email, serviceState = "off"))
         }
     }
