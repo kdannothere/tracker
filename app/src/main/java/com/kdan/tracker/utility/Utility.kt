@@ -4,12 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.kdan.tracker.MainActivity
-import com.kdan.tracker.database.Mark
 
 object Utility {
 
@@ -42,7 +39,4 @@ object Utility {
         if (!isGpsEnabled && !isNetworkEnabled) return false
         return true
     }
-
-    //val dateTimeFormat: DateFormat =
-    //    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 }

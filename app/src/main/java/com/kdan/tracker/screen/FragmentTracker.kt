@@ -1,10 +1,13 @@
 package com.kdan.tracker.screen
 
-import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,9 +20,12 @@ import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.tracker.MainActivity
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
+import com.kdan.tracker.database.user_data.UserDatabase
 import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
+import com.kdan.tracker.utility.Utility
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -31,11 +37,6 @@ fun FragmentTracker(
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     TrackerApp.email = authViewModel.getUserEmail()
-    val sharedPref = applicationContext.getSharedPreferences("trackerPref", Application.MODE_PRIVATE)
-    sharedPref.edit().apply {
-        putString("email", authViewModel.getUserEmail())
-        apply()
-    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
@@ -91,7 +92,8 @@ private fun ButtonStartStop(
     applicationContext: Context,
 ) {
     val textOfButton = if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
-        CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS) {
+        CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
+    ) {
         stringResource(id = R.string.button_start)
     } else {
         stringResource(id = R.string.button_stop)
@@ -107,18 +109,19 @@ private fun ButtonStartStop(
     }
 }
 
-fun runTracker(context: Context) {
+@OptIn(DelicateCoroutinesApi::class)
+fun runTracker(applicationContext: Context) {
     if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
         CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
     ) {
         GlobalScope.launch {
             CurrentStatus.setNewStatus(Status.LOADING)
-            LocationService.startTracking(context)
+            LocationService.startTracking(applicationContext)
         }
     } else {
         GlobalScope.launch {
             CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
-            LocationService.stopTracking(context)
+            LocationService.stopTracking(applicationContext)
         }
     }
 }

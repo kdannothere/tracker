@@ -9,16 +9,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import com.kdan.tracker.database.user_data.UserData
+import com.kdan.tracker.database.user_data.UserDatabase
 import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import com.kdan.tracker.utility.Utility
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 @HiltAndroidApp
 class TrackerApp: Application() {
 
+    private lateinit var userDataDb: UserDatabase
+    private lateinit var locationManager: LocationManager
     private lateinit var requestSendLocation: WorkRequest
     private lateinit var handler: Handler
     private val delay = 2000L
@@ -31,15 +38,27 @@ class TrackerApp: Application() {
         var email = ""
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
-        val sharedPref = getSharedPreferences("trackerPref", MODE_PRIVATE)
-        email = sharedPref.getString("email", null).toString()
-        val status = sharedPref.getString("status", null).toString()
-        if (status == "on") {
-            CurrentStatus.setNewStatus(Status.LOADING)
-            LocationService.startTracking(applicationContext)
+        GlobalScope.launch {
+            userDataDb = UserDatabase.getDatabase(applicationContext)
+            val userData: UserData? = userDataDb.dao.getSavedUserData()
+            if (userData == null) {
+                userDataDb.dao.upsertUserData(
+                    UserData(
+                        email = email,
+                        serviceState = "off"
+                    )
+                )
+            }
+            email = userData!!.email
+            if (userData.serviceState == "on") {
+                CurrentStatus.setNewStatus(Status.LOADING)
+                LocationService.startTracking(applicationContext)
+            }
         }
+        locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         requestSendLocation = PeriodicWorkRequestBuilder<WorkerSendLocation>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.HOURS
@@ -54,15 +73,11 @@ class TrackerApp: Application() {
             handler.postDelayed(tempThread!!, delay)
             when (CurrentStatus.status.value) {
                 Status.LOADING -> {
-                    val locationManager =
-                        applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (!Utility.checkGps(locationManager)) {
                         CurrentStatus.setNewStatus(Status.GPS_IS_OFF)
                     }
                 }
                 Status.GPS_IS_OFF -> {
-                    val locationManager =
-                        applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (Utility.checkGps(locationManager)) {
                         CurrentStatus.setNewStatus(Status.LOADING)
                     }

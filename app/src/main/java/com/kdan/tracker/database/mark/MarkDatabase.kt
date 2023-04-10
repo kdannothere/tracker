@@ -1,4 +1,4 @@
-package com.kdan.tracker.database
+package com.kdan.tracker.database.mark
 
 import android.content.Context
 import androidx.room.Database
@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     version = 2
 )
 
-abstract class TrackerDatabase : RoomDatabase() {
+abstract class MarkDatabase : RoomDatabase() {
 
     abstract val dao: MarkDao
 
@@ -44,9 +44,9 @@ abstract class TrackerDatabase : RoomDatabase() {
         }
 
         @Volatile
-        private var INSTANCE: TrackerDatabase? = null
+        private var INSTANCE: MarkDatabase? = null
 
-        fun getDatabase(context: Context): TrackerDatabase {
+        fun getDatabase(context: Context): MarkDatabase {
 
             val tempInstance = INSTANCE
             if (tempInstance != null) {
@@ -55,7 +55,7 @@ abstract class TrackerDatabase : RoomDatabase() {
             synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    TrackerDatabase::class.java,
+                    MarkDatabase::class.java,
                     name = dbName
                 )
                     .addMigrations(migrationFrom1To2)

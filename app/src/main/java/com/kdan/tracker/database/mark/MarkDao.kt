@@ -1,4 +1,4 @@
-package com.kdan.tracker.database
+package com.kdan.tracker.database.mark
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -14,6 +14,6 @@ interface MarkDao {
     @Delete
     suspend fun deleteMark(mark: Mark)
 
-    @Query("SELECT * FROM ${TrackerDatabase.dbName}")
+    @Query("SELECT * FROM ${MarkDatabase.dbName}")
     fun getAllMarks(): List<Mark>
 }

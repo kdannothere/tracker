@@ -6,15 +6,15 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.screen.FragmentRestorePassword
 import com.kdan.authorization.screen.FragmentSignIn
 import com.kdan.authorization.screen.FragmentSignUp
+import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.tracker.MainActivity
 import com.kdan.tracker.screen.FragmentTracker
 
@@ -23,7 +23,7 @@ fun Navigation(
     navController: NavHostController,
     applicationContext: Context,
     activity: MainActivity,
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = hiltViewModel(),
 ) {
 
     Surface(modifier = Modifier.fillMaxSize(),

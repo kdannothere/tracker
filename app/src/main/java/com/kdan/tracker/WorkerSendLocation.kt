@@ -1,12 +1,11 @@
 package com.kdan.tracker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.kdan.tracker.database.TrackerDatabase
+import com.kdan.tracker.database.mark.MarkDatabase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -14,7 +13,7 @@ class WorkerSendLocation(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
     override fun doWork(): Result {
         val remoteDb = Firebase.firestore
-        val localDb = TrackerDatabase.getDatabase(applicationContext)
+        val localDb = MarkDatabase.getDatabase(applicationContext)
         return try {
             GlobalScope.launch {
                 val localMarks = localDb.dao.getAllMarks()

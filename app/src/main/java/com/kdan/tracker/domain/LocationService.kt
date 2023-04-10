@@ -1,6 +1,5 @@
 package com.kdan.tracker.domain
 
-import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -16,8 +15,10 @@ import com.google.firebase.ktx.Firebase
 import com.kdan.tracker.BuildConfig
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
-import com.kdan.tracker.database.Mark
-import com.kdan.tracker.database.TrackerDatabase
+import com.kdan.tracker.database.mark.Mark
+import com.kdan.tracker.database.mark.MarkDatabase
+import com.kdan.tracker.database.user_data.UserData
+import com.kdan.tracker.database.user_data.UserDatabase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -28,7 +29,8 @@ class LocationService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var remoteDb: FirebaseFirestore
-    private lateinit var localDb: TrackerDatabase
+    private lateinit var localDb: MarkDatabase
+    private lateinit var userDataDb: UserDatabase
     private lateinit var locationClient: LocationClient
 
 
@@ -43,7 +45,8 @@ class LocationService : Service() {
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
         remoteDb = Firebase.firestore
-        localDb = TrackerDatabase.getDatabase(applicationContext)
+        localDb = MarkDatabase.getDatabase(applicationContext)
+        userDataDb = UserDatabase.getDatabase(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,7 +78,6 @@ class LocationService : Service() {
                     email = TrackerApp.email,
                     latitude = location.latitude.toString(),
                     longitude = location.longitude.toString(),
-                    //dateAndTime = Utility.dateTimeFormat.format(location.time)
                 )
                 remoteDb.collection("remote_marks")
                     .add(mark)
@@ -86,6 +88,7 @@ class LocationService : Service() {
                     }
             }
             .launchIn(serviceScope)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 TrackerApp.CHANNEL_ID,
@@ -96,27 +99,20 @@ class LocationService : Service() {
         }
         startForeground(1, notification.build())
 
-        val sharedPref = applicationContext.getSharedPreferences(
-            "trackerPref", Application.MODE_PRIVATE
-        )
-        sharedPref.edit().apply {
-            putString("status", "on")
-            apply()
+        GlobalScope.launch {
+            userDataDb.dao.upsertUserData(UserData(email = TrackerApp.email, serviceState = "on"))
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun stop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else stopForeground(true)
         stopSelf()
 
-        val sharedPref = applicationContext.getSharedPreferences(
-            "trackerPref", Application.MODE_PRIVATE
-        )
-        sharedPref.edit().apply {
-            putString("status", "off")
-            apply()
+        GlobalScope.launch {
+            userDataDb.dao.upsertUserData(UserData(email = TrackerApp.email, serviceState = "off"))
         }
     }
 
