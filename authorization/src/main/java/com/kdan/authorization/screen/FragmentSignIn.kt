@@ -15,13 +15,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.R.string
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
+import com.kdan.authorization.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)

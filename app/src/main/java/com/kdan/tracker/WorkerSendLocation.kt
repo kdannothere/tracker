@@ -5,7 +5,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.kdan.tracker.database.mark.MarkDatabase
+import com.kdan.tracker.database.AppDatabase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -13,16 +13,16 @@ class WorkerSendLocation(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
     override fun doWork(): Result {
         val remoteDb = Firebase.firestore
-        val localDb = MarkDatabase.getDatabase(applicationContext)
+        val localDb = AppDatabase.getDatabase(applicationContext)
         return try {
             GlobalScope.launch {
-                val localMarks = localDb.dao.getAllMarks()
+                val localMarks = localDb.markDao.getAllMarks()
                 localMarks.forEach { mark ->
                     remoteDb.collection("remote_marks")
                         .add(mark)
                         .addOnSuccessListener {
                             GlobalScope.launch {
-                                localDb.dao.deleteMark(mark)
+                                localDb.markDao.deleteMark(mark)
                             }
                         }
                 }

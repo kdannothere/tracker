@@ -104,19 +104,12 @@ private fun ButtonStartStop(
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun runTracker(applicationContext: Context) {
     if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
         CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
     ) {
-        GlobalScope.launch {
-            CurrentStatus.setNewStatus(Status.LOADING)
-            LocationService.startTracking(applicationContext)
-        }
+        LocationService.startTracking(applicationContext)
     } else {
-        GlobalScope.launch {
-            CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
-            LocationService.stopTracking(applicationContext)
-        }
+        LocationService.stopTracking(applicationContext)
     }
 }

@@ -25,7 +25,6 @@ fun Navigation(
     activity: MainActivity,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
-
     Surface(modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background) {
         NavHost(

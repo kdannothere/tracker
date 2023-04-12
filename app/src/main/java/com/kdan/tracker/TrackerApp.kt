@@ -9,8 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.kdan.tracker.database.user_data.UserData
-import com.kdan.tracker.database.user_data.UserDatabase
+import com.kdan.tracker.database.AppDatabase
+import com.kdan.tracker.database.user.User
 import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 @HiltAndroidApp
 class TrackerApp: Application() {
 
-    private lateinit var userDataDb: UserDatabase
+    private lateinit var database: AppDatabase
     private lateinit var locationManager: LocationManager
     private lateinit var requestSendLocation: WorkRequest
     private lateinit var handler: Handler
@@ -42,20 +42,18 @@ class TrackerApp: Application() {
     override fun onCreate() {
         super.onCreate()
         GlobalScope.launch {
-            userDataDb = UserDatabase.getDatabase(applicationContext)
-            val userData: UserData? = userDataDb.dao.getSavedUserData()
-            if (userData == null) {
-                userDataDb.dao.upsertUserData(
-                    UserData(
-                        email = email,
-                        serviceState = "off"
-                    )
-                )
+            database = AppDatabase.getDatabase(applicationContext)
+            var user: User? = database.userDao.getUser()
+            if (user == null) {
+                database.userDao.upsertUser(User())
+                user = database.userDao.getUser()
             }
-            email = userData!!.email
-            if (userData.serviceState == "on") {
-                CurrentStatus.setNewStatus(Status.LOADING)
-                LocationService.startTracking(applicationContext)
+            if (user != null) {
+                email = user.email
+                if (user.serviceState == "on" && user.email != "") {
+                    CurrentStatus.setNewStatus(Status.LOADING)
+                    LocationService.startTracking(applicationContext)
+                }
             }
         }
         locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager

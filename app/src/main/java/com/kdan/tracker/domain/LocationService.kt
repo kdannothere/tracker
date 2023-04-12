@@ -15,23 +15,21 @@ import com.google.firebase.ktx.Firebase
 import com.kdan.tracker.BuildConfig
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
+import com.kdan.tracker.database.AppDatabase
 import com.kdan.tracker.database.mark.Mark
-import com.kdan.tracker.database.mark.MarkDatabase
-import com.kdan.tracker.database.user_data.UserData
-import com.kdan.tracker.database.user_data.UserDatabase
+import com.kdan.tracker.database.user.User
 import com.kdan.tracker.utility.CurrentStatus
+import com.kdan.tracker.utility.Status
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-
 class LocationService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var remoteDb: FirebaseFirestore
-    private lateinit var localDb: MarkDatabase
-    private lateinit var userDataDb: UserDatabase
+    private lateinit var localDb: AppDatabase
     private lateinit var locationClient: LocationClient
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -45,8 +43,7 @@ class LocationService : Service() {
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
         remoteDb = Firebase.firestore
-        localDb = MarkDatabase.getDatabase(applicationContext)
-        userDataDb = UserDatabase.getDatabase(applicationContext)
+        localDb = AppDatabase.getDatabase(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -83,7 +80,7 @@ class LocationService : Service() {
                     .add(mark)
                     .addOnFailureListener {
                         GlobalScope.launch {
-                            localDb.dao.upsertMark(mark)
+                            localDb.markDao.upsertMark(mark)
                         }
                     }
             }
@@ -100,7 +97,7 @@ class LocationService : Service() {
         startForeground(1, notification.build())
 
         GlobalScope.launch {
-            userDataDb.dao.upsertUserData(UserData(email = TrackerApp.email, serviceState = "on"))
+            localDb.userDao.upsertUser(User(email = TrackerApp.email, serviceState = "on"))
         }
     }
 
@@ -116,7 +113,7 @@ class LocationService : Service() {
                 TrackerApp.email = ""
                 CurrentStatus.isLoggingOut = false
             }
-            userDataDb.dao.upsertUserData(UserData(email = TrackerApp.email, serviceState = "off"))
+            localDb.userDao.upsertUser(User(email = TrackerApp.email, serviceState = "off"))
         }
     }
 
@@ -130,6 +127,7 @@ class LocationService : Service() {
         const val ACTION_STOP = "ACTION_STOP"
 
         fun startTracking(applicationContext: Context) {
+            CurrentStatus.setNewStatus(Status.LOADING)
             Intent(applicationContext, LocationService::class.java).apply {
                 action = ACTION_START
                 applicationContext.startService(this)
@@ -137,6 +135,7 @@ class LocationService : Service() {
         }
 
         fun stopTracking(applicationContext: Context) {
+            CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
             Intent(applicationContext, LocationService::class.java).apply {
                 action = ACTION_STOP
                 applicationContext.startService(this)
