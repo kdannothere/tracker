@@ -5,6 +5,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelStoreOwner
 import com.kdan.tracker.MainActivity
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
@@ -12,7 +13,9 @@ import com.kdan.tracker.utility.Utility
 
 
 @Composable
-fun ShowAlertDialog(activity: MainActivity) {
+fun ShowAlertDialog(
+    activity: MainActivity,
+) {
     AlertDialog(
         title = {
             Text(text = stringResource(id = R.string.dialog_title))

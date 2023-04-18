@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.kdan.authorization.R.string
@@ -29,7 +30,10 @@ fun FragmentSignIn(
     navController: NavHostController,
     context: Context,
     routeToTracker: String,
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModelStoreOwner: ViewModelStoreOwner,
+    viewModel: AuthViewModel = hiltViewModel(
+        viewModelStoreOwner = viewModelStoreOwner
+    ),
 ) {
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
@@ -109,7 +113,7 @@ fun FragmentSignIn(
                     Text(text = stringResource(id = string.sign_in))
                 }
                 if (viewModel.showDialog.value) {
-                    ShowAlertDialog(context = context)
+                    ShowAlertDialog(context, viewModelStoreOwner)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(onClick = {

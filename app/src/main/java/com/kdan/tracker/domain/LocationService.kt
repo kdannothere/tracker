@@ -12,12 +12,14 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kdan.coredatabase.AppDatabase
+import com.kdan.coredatabase.mark.Mark
+import com.kdan.coredatabase.mark.MarkRepository
+import com.kdan.coredatabase.user.User
+import com.kdan.coredatabase.user.UserRepository
 import com.kdan.tracker.BuildConfig
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
-import com.kdan.tracker.database.AppDatabase
-import com.kdan.tracker.database.mark.Mark
-import com.kdan.tracker.database.user.User
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import kotlinx.coroutines.*
@@ -25,11 +27,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+
 class LocationService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var remoteDb: FirebaseFirestore
-    private lateinit var localDb: AppDatabase
+    private lateinit var userRepository: UserRepository
+    private lateinit var markRepository: MarkRepository
     private lateinit var locationClient: LocationClient
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -43,7 +47,14 @@ class LocationService : Service() {
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
         remoteDb = Firebase.firestore
-        localDb = AppDatabase.getDatabase(applicationContext)
+        AppDatabase.getDatabase(applicationContext).run {
+            userRepository = UserRepository(
+                dao = getUserDao()
+            )
+            markRepository = MarkRepository(
+                dao = getMarkDao()
+            )
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -51,6 +62,7 @@ class LocationService : Service() {
             ACTION_START -> {
                 start()
             }
+
             ACTION_STOP -> stop()
         }
         return START_NOT_STICKY
@@ -76,11 +88,11 @@ class LocationService : Service() {
                     latitude = location.latitude.toString(),
                     longitude = location.longitude.toString(),
                 )
-                remoteDb.collection("remote_marks")
+                remoteDb.collection(AppDatabase.tableRemoteMarks)
                     .add(mark)
                     .addOnFailureListener {
                         GlobalScope.launch {
-                            localDb.markDao.upsertMark(mark)
+                            markRepository.upsertMark(mark)
                         }
                     }
             }
@@ -97,7 +109,12 @@ class LocationService : Service() {
         startForeground(1, notification.build())
 
         GlobalScope.launch {
-            localDb.userDao.upsertUser(User(email = TrackerApp.email, serviceState = "on"))
+            userRepository.upsertUser(
+                User(
+                    email = TrackerApp.email,
+                    serviceState = "on"
+                )
+            )
         }
     }
 
@@ -113,7 +130,12 @@ class LocationService : Service() {
                 TrackerApp.email = ""
                 CurrentStatus.isLoggingOut = false
             }
-            localDb.userDao.upsertUser(User(email = TrackerApp.email, serviceState = "off"))
+            userRepository.upsertUser(
+                User(
+                    email = TrackerApp.email,
+                    serviceState = "off"
+                )
+            )
         }
     }
 

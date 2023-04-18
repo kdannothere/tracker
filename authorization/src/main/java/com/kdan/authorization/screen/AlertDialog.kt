@@ -6,15 +6,19 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import com.kdan.authorization.R
-import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.utility.Utility
+import com.kdan.authorization.viewmodel.AuthViewModel
 
 @Composable
 fun ShowAlertDialog(
-    viewModel: AuthViewModel = viewModel(),
     context: Context,
+    viewModelStoreOwner: ViewModelStoreOwner,
+    viewModel: AuthViewModel = hiltViewModel(
+        viewModelStoreOwner = viewModelStoreOwner
+    ),
 ) {
     AlertDialog(
         title = {

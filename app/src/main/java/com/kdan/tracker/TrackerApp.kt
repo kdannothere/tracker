@@ -6,11 +6,13 @@ import android.location.LocationManager
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.mutableStateOf
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.kdan.tracker.database.AppDatabase
-import com.kdan.tracker.database.user.User
+import com.kdan.coredatabase.user.User
+import com.kdan.coredatabase.user.UserRepository
 import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
@@ -20,11 +22,18 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @HiltAndroidApp
-class TrackerApp: Application() {
+class TrackerApp : Application(),
+    Configuration.Provider {
 
-    private lateinit var database: AppDatabase
+    @Inject
+    lateinit var repository: UserRepository
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
     private lateinit var locationManager: LocationManager
     private lateinit var requestSendLocation: WorkRequest
     private lateinit var handler: Handler
@@ -42,11 +51,10 @@ class TrackerApp: Application() {
     override fun onCreate() {
         super.onCreate()
         GlobalScope.launch {
-            database = AppDatabase.getDatabase(applicationContext)
-            var user: User? = database.userDao.getUser()
+            var user: User? = repository.getUser()
             if (user == null) {
-                database.userDao.upsertUser(User())
-                user = database.userDao.getUser()
+                repository.upsertUser(User())
+                user = repository.getUser()
             }
             if (user != null) {
                 email = user.email
@@ -56,7 +64,8 @@ class TrackerApp: Application() {
                 }
             }
         }
-        locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager =
+            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         requestSendLocation = PeriodicWorkRequestBuilder<WorkerSendLocation>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.HOURS
@@ -75,11 +84,13 @@ class TrackerApp: Application() {
                         CurrentStatus.setNewStatus(Status.GPS_IS_OFF)
                     }
                 }
+
                 Status.GPS_IS_OFF -> {
                     if (Utility.checkGps(locationManager)) {
                         CurrentStatus.setNewStatus(Status.LOADING)
                     }
                 }
+
                 Status.HAS_NO_PERMISSIONS -> {
                     if (showAlertDialog.value) return@Runnable
                     if (!Utility.hasLocationPermission(applicationContext)) {
@@ -90,6 +101,7 @@ class TrackerApp: Application() {
                         LocationService.startTracking(applicationContext)
                     }
                 }
+
                 else -> {
                     return@Runnable
                 }
@@ -99,4 +111,8 @@ class TrackerApp: Application() {
         }, delay)
     }
 
+    override fun getWorkManagerConfiguration() =
+        Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

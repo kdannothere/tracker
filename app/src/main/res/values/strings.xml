@@ -11,4 +11,5 @@
     <string name="dialog_text">Tracker won`t work without permissions. Give them, please.</string>
     <string name="dialog_text_button_okay">Okay</string>
     <string name="dialog_text_button_give">Give permissions</string>
+    <string name="button_open_map">OPEN MAP</string>
 </resources>

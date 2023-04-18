@@ -7,6 +7,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +16,9 @@ import com.kdan.authorization.screen.FragmentRestorePassword
 import com.kdan.authorization.screen.FragmentSignIn
 import com.kdan.authorization.screen.FragmentSignUp
 import com.kdan.authorization.viewmodel.AuthViewModel
+import com.kdan.map.navigation.RoutesMap
+import com.kdan.map.screen.FragmentMap
+import com.kdan.map.screen.FragmentSettings
 import com.kdan.tracker.MainActivity
 import com.kdan.tracker.screen.FragmentTracker
 
@@ -25,6 +29,10 @@ fun Navigation(
     activity: MainActivity,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
+    }
+
     Surface(modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background) {
         NavHost(
@@ -37,26 +45,44 @@ fun Navigation(
                 FragmentTracker(
                     navController,
                     applicationContext,
-                    activity
+                    activity,
+                    viewModelStoreOwner
+                )
+            }
+            composable(route = RoutesMap.fragmentMap) {
+                FragmentMap(
+                    navController,
+                    applicationContext,
+                    RouteTracker.fragmentTracker,
+                    viewModelStoreOwner,
+                )
+            }
+            composable(route = RoutesMap.fragmentSettings) {
+                FragmentSettings(
+                    navController,
+                    viewModelStoreOwner,
                 )
             }
             composable(route = RoutesAuth.fragmentSignIn) {
                 FragmentSignIn(
                     navController,
                     applicationContext,
-                    routeToTracker = RouteTracker.fragmentTracker
+                    RouteTracker.fragmentTracker,
+                    viewModelStoreOwner
                 )
             }
             composable(route = RoutesAuth.fragmentSignUp) {
                 FragmentSignUp(
                     navController,
-                    applicationContext
+                    applicationContext,
+                    viewModelStoreOwner
                 )
             }
             composable(route = RoutesAuth.fragmentRestorePassword) {
                 FragmentRestorePassword(
                     navController,
-                    applicationContext
+                    applicationContext,
+                    viewModelStoreOwner
                 )
             }
         }

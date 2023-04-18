@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
@@ -29,7 +30,10 @@ import kotlinx.coroutines.launch
 fun FragmentRestorePassword(
     navController: NavHostController,
     context: Context,
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModelStoreOwner: ViewModelStoreOwner,
+    viewModel: AuthViewModel = hiltViewModel(
+        viewModelStoreOwner = viewModelStoreOwner
+    ),
 ) {
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
@@ -63,7 +67,7 @@ fun FragmentRestorePassword(
                     )
                 )
                 if (viewModel.showDialog.value) {
-                    ShowAlertDialog(context = context)
+                    ShowAlertDialog(context, viewModelStoreOwner)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(
