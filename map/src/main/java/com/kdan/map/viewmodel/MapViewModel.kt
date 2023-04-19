@@ -39,17 +39,17 @@ class MapViewModel @Inject constructor(
     val textDateTo = mutableStateOf("")
     val textTimeTo = mutableStateOf("")
 
-    var dateFromDay = 0
-    var dateFromMonth = 0
-    var dateFromYear = 0
-    var timeFromHour = 0
-    var timeFromMinute = 0
+    var fromDay = 0
+    var fromMonth = 0
+    var fromYear = 0
+    var fromHour = 0
+    var fromMinute = 0
 
-    var dateToDay = 0
-    var dateToMonth = 0
-    var dateToYear = 0
-    var timeToHour = 0
-    var timeToMinute = 0
+    var toDay = 0
+    var toMonth = 0
+    var toYear = 0
+    var toHour = 0
+    var toMinute = 0
 
 
     init {
@@ -74,13 +74,17 @@ class MapViewModel @Inject constructor(
     fun updateMarksInTimeRange() {
         viewModelScope.launch {
             val newList = mutableListOf<MarkMap>()
-            val range = timeFrom..timeTo
+
+            val range = if (timeFrom > timeTo) {
+                timeTo..timeFrom
+            } else timeFrom..timeTo
+
             allMarks.forEach { mark ->
                 if (mark.time.toLong() in range) {
                     newList.add(mark)
                 }
             }
-            marksInTimeRange.value = newList
+            marksInTimeRange.value = Utility.getSortedOutMarks(newList)
         }
     }
 

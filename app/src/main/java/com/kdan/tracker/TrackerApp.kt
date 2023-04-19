@@ -116,3 +116,32 @@ class TrackerApp : Application(),
             .setWorkerFactory(workerFactory)
             .build()
 }
+
+/*
+
+ ********************
+ * IDEAS TO IMPROVE *
+ ********************
+
+ add parent control option to get and show user location in real time
+ (now you need to go to settings and press "Load marks from cloud"
+ to see the last saved location)
+
+ add error messages
+
+ add options to settings to save last map scale
+ or to set map scale based on user location
+
+ change start-end markers images
+
+ add markers and info for saved locations
+
+ ***************
+ * WHAT TO FIX *
+ ***************
+
+ numbers of date and time
+
+ sometimes it has crash on launch, it only shows [hilt]
+
+*/

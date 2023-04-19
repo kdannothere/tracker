@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.map.navigation.RoutesMap
+import com.kdan.map.screen.elements.DateTimePickers
 import com.kdan.map.viewmodel.MapViewModel
 
 @Composable

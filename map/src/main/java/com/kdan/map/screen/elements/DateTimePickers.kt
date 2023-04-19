@@ -1,7 +1,8 @@
-package com.kdan.map.screen
+package com.kdan.map.screen.elements
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.util.Log
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import com.kdan.map.utility.Utility
 import com.kdan.map.viewmodel.MapViewModel
 import java.util.Calendar
 import java.util.Date
-
+// be careful with date that you save and date that you show
+// first month has index 0, not 1
 @Composable
 fun DateTimePickers(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -40,7 +43,7 @@ fun DateTimePickers(
     val currentMinute: Int
 
     val calendar = Calendar.getInstance()
-    val fakeCalendar = Calendar.getInstance()
+    val fakeCalendar = Calendar.getInstance() // to set and save date and time
 
     currentYear = calendar.get(Calendar.YEAR)
     currentMonth = calendar.get(Calendar.MONTH)
@@ -52,22 +55,22 @@ fun DateTimePickers(
     mapViewModel.run {
         if (textDateFrom.value.isBlank()) {
 
+            fromDay = currentDay - 1
+            fromMonth = currentMonth
+            fromYear = currentYear
+            fromHour = currentHour
+            fromMinute = currentMinute
+
+            toDay = currentDay
+            toMonth = currentMonth
+            toYear = currentYear
+            toHour = currentHour
+            toMinute = currentMinute
+
             textDateFrom.value = "${currentDay - 1}/${currentMonth + 1}/$currentYear"
             textTimeFrom.value = "${currentHour}:${currentMinute}"
             textDateTo.value = "${currentDay}/${currentMonth + 1}/$currentYear"
             textTimeTo.value = "${currentHour}:${currentMinute}"
-
-            dateFromDay = currentDay - 1
-            dateFromMonth = currentMonth + 1
-            dateFromYear = currentYear
-            timeFromHour = currentHour
-            timeFromMinute = currentMinute
-
-            dateToDay = currentDay
-            dateToMonth = currentMonth + 1
-            dateToYear = currentYear
-            timeToHour = currentHour
-            timeToMinute = currentMinute
         }
     }
 
@@ -78,9 +81,12 @@ fun DateTimePickers(
         { _: DatePicker, newYear: Int, newMonth: Int, newDay: Int ->
             mapViewModel.run {
                 textDateFrom.value = "$newDay/${newMonth + 1}/$newYear"
+                fromYear = newYear
+                fromMonth = newMonth
+                fromDay = newDay
                 fakeCalendar.set(
-                    newYear, newMonth + 1, newDay,
-                    timeFromHour, timeFromMinute,
+                    newYear, newMonth, newDay,
+                    fromHour, fromMinute,
                 )
                 timeFrom = fakeCalendar.timeInMillis
                 updateMarksInTimeRange()
@@ -92,8 +98,10 @@ fun DateTimePickers(
         { _: TimePicker, newHour: Int, newMinute: Int ->
             mapViewModel.run {
                 textTimeFrom.value = "$newHour:$newMinute"
+                fromHour = newHour
+                fromMinute = newMinute
                 fakeCalendar.set(
-                    dateFromYear, dateFromMonth + 1, dateFromDay,
+                    fromYear, fromMonth, fromDay,
                     newHour, newMinute,
                 )
                 timeFrom = fakeCalendar.timeInMillis
@@ -106,7 +114,10 @@ fun DateTimePickers(
         { _: DatePicker, newYear: Int, newMonth: Int, newDay: Int ->
             mapViewModel.run {
                 textDateTo.value = "$newDay/${newMonth + 1}/$newYear"
-                fakeCalendar.set(newYear, newMonth + 1, newDay, timeToHour, timeToMinute)
+                toYear = newYear
+                toMonth = newMonth
+                toDay = newDay
+                fakeCalendar.set(newYear, newMonth, newDay, toHour, toMinute)
                 timeTo = fakeCalendar.timeInMillis
                 updateMarksInTimeRange()
             }
@@ -117,8 +128,10 @@ fun DateTimePickers(
         { _: TimePicker, newHour: Int, newMinute: Int ->
             mapViewModel.run {
                 textTimeTo.value = "$newHour:$newMinute"
+                toHour = newHour
+                toMinute = newMinute
                 fakeCalendar.set(
-                    dateToYear, dateToMonth + 1, dateToDay,
+                    toYear, toMonth, toDay,
                     newHour, newMinute,
                 )
                 timeTo = fakeCalendar.timeInMillis
