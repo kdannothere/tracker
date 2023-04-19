@@ -2,13 +2,13 @@
 This Android app tracks locations and sends them to firebase/cloud firestore server. 
 Also the app can show on the map collected locations of authenticated user.
 
-![](screenshots/1.jpg =308x720)
-![](screenshots/2.jpg =308x720)
-![](screenshots/3.jpg =308x720)
-![](screenshots/4.jpg =308x720)
-![](screenshots/5.jpg =308x720)
-![](screenshots/6.jpg =308x720)
-![](screenshots/7.jpg =308x720)
-![](screenshots/8.jpg =308x720)
-![](screenshots/9.jpg =308x720)
-![](screenshots/10.jpg =308x720)
+<img src="screenshots/1.jpg" width="308" height="740">
+<img src="screenshots/2.jpg" width="308" height="740">
+<img src="screenshots/3.jpg" width="308" height="740">
+<img src="screenshots/4.jpg" width="308" height="740">
+<img src="screenshots/5.jpg" width="308" height="740">
+<img src="screenshots/6.jpg" width="308" height="740">
+<img src="screenshots/7.jpg" width="308" height="740">
+<img src="screenshots/8.jpg" width="308" height="740">
+<img src="screenshots/9.jpg" width="308" height="740">
+<img src="screenshots/10.jpg" width="308" height="740">
