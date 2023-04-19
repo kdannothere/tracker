@@ -12,6 +12,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +23,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.map.navigation.RoutesMap
 import com.kdan.map.screen.elements.ShowOnMap
@@ -38,6 +43,12 @@ fun FragmentMap(
         viewModelStoreOwner = viewModelStoreOwner
     ),
 ) {
+    val uiSettings = remember {
+        MapUiSettings(myLocationButtonEnabled = true)
+    }
+    val properties by remember {
+        mutableStateOf(MapProperties(isMyLocationEnabled = true))
+    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
@@ -46,16 +57,20 @@ fun FragmentMap(
             GoogleMap(
                 modifier = Modifier.matchParentSize(),
                 cameraPositionState = mapViewModel.cameraPositionState,
+                properties = properties,
+                uiSettings = uiSettings,
                 onMapLoaded = {
+                    Log.d("kdanMap", "1")
                     mapViewModel.run {
                         if (allMarks.isEmpty()) {
                             updateAllMarks(email = authViewModel.getUserEmail())
                         }
                     }
-                    //Log.d("kdanMap", "onMapLoaded")
+                    Log.d("kdanMap", "onMapLoaded")
                 }
             ) {
                 ShowOnMap(marksInTimeRange = mapViewModel.marksInTimeRange)
+                Log.d("kdanMap", "2")
             }
             Column(modifier = Modifier.align(alignment = Alignment.TopEnd)) {
                 FloatingActionButton(

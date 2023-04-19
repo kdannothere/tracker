@@ -30,6 +30,7 @@ import com.kdan.tracker.TrackerApp
 import com.kdan.tracker.domain.LocationService
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
+import com.kdan.tracker.utility.Utility
 
 @Composable
 fun FragmentTracker(
@@ -72,7 +73,9 @@ fun FragmentTracker(
             ButtonStartStop(applicationContext)
             Spacer(modifier = Modifier.height(30.dp))
             Button(onClick = {
-                navController.navigate(RoutesMap.fragmentMap)
+                if (Utility.hasLocationPermission(applicationContext)) {
+                    navController.navigate(RoutesMap.fragmentMap)
+                } else TrackerApp.showAlertDialog.value = true
             }) {
                 Text(
                     text = stringResource(id = R.string.button_open_map),
