@@ -2,8 +2,6 @@
 In this Android application you can track locations and send them to firebase/cloud firestore server. 
 Also the app can show on the map collected locations of authenticated user.
 
-<h2 align="center">How to use</h2>
-
 <img src="screenshots/1.jpg" width="308">
 <img src="screenshots/2.jpg" width="308">
 <img src="screenshots/3.jpg" width="308">
