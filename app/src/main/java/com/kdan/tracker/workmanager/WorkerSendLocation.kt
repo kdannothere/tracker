@@ -1,4 +1,4 @@
-package com.kdan.tracker
+package com.kdan.tracker.workmanager
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
@@ -7,12 +7,15 @@ import androidx.work.WorkerParameters
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kdan.coredatabase.AppDatabase
+import com.kdan.coredatabase.di.AppModule
 import com.kdan.coredatabase.mark.MarkRepository
+import com.kdan.tracker.TrackerApp
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltWorker
 class WorkerSendLocation @AssistedInject constructor(
@@ -20,9 +23,11 @@ class WorkerSendLocation @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
 ) : Worker(appContext, workerParams) {
 
-    private val repository by lazy {
-        MarkRepository(dao = AppDatabase.getDatabase(appContext).getMarkDao())
-    }
+    private val repository = MarkRepository(
+        dao = AppModule.getMarkDao(
+            appDatabase = AppDatabase.getDatabase(appContext)
+        )
+    )
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun doWork(): Result {

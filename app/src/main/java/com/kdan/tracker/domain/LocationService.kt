@@ -22,18 +22,24 @@ import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
 import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class LocationService : Service() {
+
+    @Inject
+    lateinit var userRepository: UserRepository
+
+    @Inject
+    lateinit var markRepository: MarkRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var remoteDb: FirebaseFirestore
-    private lateinit var userRepository: UserRepository
-    private lateinit var markRepository: MarkRepository
     private lateinit var locationClient: LocationClient
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -47,14 +53,6 @@ class LocationService : Service() {
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
         remoteDb = Firebase.firestore
-        AppDatabase.getDatabase(applicationContext).run {
-            userRepository = UserRepository(
-                dao = getUserDao()
-            )
-            markRepository = MarkRepository(
-                dao = getMarkDao()
-            )
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
