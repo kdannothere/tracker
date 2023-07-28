@@ -20,7 +20,6 @@ import com.kdan.coredatabase.user.UserRepository
 import com.kdan.tracker.BuildConfig
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
-import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -30,7 +29,7 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LocationService : Service() {
+class LocationService(private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO) : Service() {
 
     @Inject
     lateinit var userRepository: UserRepository
@@ -60,13 +59,11 @@ class LocationService : Service() {
             ACTION_START -> {
                 start()
             }
-
             ACTION_STOP -> stop()
         }
         return START_NOT_STICKY
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun start() {
         val notification = NotificationCompat.Builder(this, TrackerApp.CHANNEL_ID)
             .setContentTitle("Tracker is on")
@@ -89,7 +86,7 @@ class LocationService : Service() {
                 remoteDb.collection(AppDatabase.tableRemoteMarks)
                     .add(mark)
                     .addOnFailureListener {
-                        GlobalScope.launch {
+                        serviceScope.launch(dispatcherIO) {
                             markRepository.upsertMark(mark)
                         }
                     }
@@ -106,7 +103,7 @@ class LocationService : Service() {
         }
         startForeground(1, notification.build())
 
-        GlobalScope.launch {
+        serviceScope.launch(dispatcherIO) {
             userRepository.upsertUser(
                 User(
                     email = TrackerApp.email,
@@ -116,17 +113,17 @@ class LocationService : Service() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun stop() {
+        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else stopForeground(true)
         stopSelf()
 
-        GlobalScope.launch {
-            if (CurrentStatus.isLoggingOut) {
+        serviceScope.launch(dispatcherIO) {
+            if (TrackerApp.isLoggingOut) {
                 TrackerApp.email = ""
-                CurrentStatus.isLoggingOut = false
+                TrackerApp.isLoggingOut = false
             }
             userRepository.upsertUser(
                 User(
@@ -147,7 +144,7 @@ class LocationService : Service() {
         const val ACTION_STOP = "ACTION_STOP"
 
         fun startTracking(applicationContext: Context) {
-            CurrentStatus.setNewStatus(Status.LOADING)
+            TrackerApp.setNewStatus(Status.LOADING)
             Intent(applicationContext, LocationService::class.java).apply {
                 action = ACTION_START
                 applicationContext.startService(this)
@@ -155,7 +152,7 @@ class LocationService : Service() {
         }
 
         fun stopTracking(applicationContext: Context) {
-            CurrentStatus.setNewStatus(Status.TRACKER_IS_OFF)
+            TrackerApp.setNewStatus(Status.TRACKER_IS_OFF)
             Intent(applicationContext, LocationService::class.java).apply {
                 action = ACTION_STOP
                 applicationContext.startService(this)

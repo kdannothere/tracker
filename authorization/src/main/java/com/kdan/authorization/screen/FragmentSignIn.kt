@@ -1,6 +1,5 @@
 package com.kdan.authorization.screen
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,10 +13,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
-import com.google.firebase.auth.FirebaseAuth
 import com.kdan.authorization.R.string
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
@@ -28,12 +24,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun FragmentSignIn(
     navController: NavHostController,
-    context: Context,
     routeToTracker: String,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    viewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    viewModel: AuthViewModel,
 ) {
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
@@ -99,12 +91,8 @@ fun FragmentSignIn(
                     onClick = {
                         scope.launch {
                             signIn(
-                                auth = viewModel.auth,
                                 navHostController = navController,
-                                email = viewModel.email,
-                                password = viewModel.password,
-                                showDialog = viewModel.showDialog,
-                                messageCodes = viewModel.messageCodes,
+                                viewModel = viewModel,
                                 routeToTracker = routeToTracker
                             )
                             keyboard?.hide()
@@ -113,7 +101,7 @@ fun FragmentSignIn(
                     Text(text = stringResource(id = string.sign_in))
                 }
                 if (viewModel.showDialog.value) {
-                    ShowAlertDialog(context, viewModelStoreOwner)
+                    ShowAlertDialog(viewModel)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(onClick = {
@@ -135,27 +123,25 @@ fun FragmentSignIn(
 }
 
 private fun signIn(
-    auth: FirebaseAuth,
     navHostController: NavHostController,
-    email: String,
-    password: String,
-    showDialog: MutableState<Boolean>,
-    messageCodes: MutableList<Int>,
+    viewModel: AuthViewModel,
     routeToTracker: String,
 ) {
-    val isEmailOkay = Utility.checkEmail(email, messageCodes)
-    val isPasswordOkay = Utility.checkPassword(password, messageCodes)
-    if (!isEmailOkay || !isPasswordOkay) {
-        Utility.turnOnDialog(showDialog)
-        return
-    }
-    auth.signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                navHostController.navigate(routeToTracker)
-            } else {
-                Utility.addMessageCode(string.message_failure, messageCodes)
-                Utility.turnOnDialog(showDialog)
-            }
+    viewModel.apply {
+        val isEmailOkay = Utility.checkEmail(email, messageCodes)
+        val isPasswordOkay = Utility.checkPassword(password, messageCodes)
+        if (!isEmailOkay || !isPasswordOkay) {
+            Utility.turnOnDialog(showDialog)
+            return
         }
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    navHostController.navigate(routeToTracker)
+                } else {
+                    Utility.addMessageCode(string.message_failure, messageCodes)
+                    Utility.turnOnDialog(showDialog)
+                }
+            }
+    }
 }

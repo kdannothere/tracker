@@ -14,20 +14,31 @@ import androidx.work.WorkRequest
 import com.kdan.coredatabase.user.User
 import com.kdan.coredatabase.user.UserRepository
 import com.kdan.tracker.domain.LocationService
-import com.kdan.tracker.utility.CurrentStatus
 import com.kdan.tracker.utility.Status
 import com.kdan.tracker.utility.Utility
 import com.kdan.tracker.workmanager.WorkerSendLocation
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 @HiltAndroidApp
-class TrackerApp : Application(),
-    Configuration.Provider {
+class TrackerApp(
+    private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
+) : Application(),
+    Configuration.Provider, CoroutineScope {
+
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
 
     @Inject
     lateinit var repository: UserRepository
@@ -38,20 +49,32 @@ class TrackerApp : Application(),
     private lateinit var locationManager: LocationManager
     private lateinit var requestSendLocation: WorkRequest
     private lateinit var handler: Handler
-    private val delay = 2000L
-    private var tempThread: Runnable? = null
+
 
     companion object {
+        lateinit var instance: TrackerApp
+            private set
+
         const val CHANNEL_ID = "tracker"
         const val CHANNEL_NAME = "Tracker"
         val showAlertDialog = mutableStateOf(false)
         var email = ""
+
+        private val scope = CoroutineScope(instance.coroutineContext)
+        private val status = MutableStateFlow(Status.TRACKER_IS_OFF)
+        var isLoggingOut = false
+
+        fun setNewStatus(newStatus: Status) {
+            scope.launch(Dispatchers.IO) {
+                status.emit(newStatus)
+            }
+        }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
-        GlobalScope.launch {
+        instance = this
+        launch {
             var user: User? = repository.getUser()
             if (user == null) {
                 repository.upsertUser(User())
@@ -60,7 +83,7 @@ class TrackerApp : Application(),
             if (user != null) {
                 email = user.email
                 if (user.serviceState == "on" && user.email != "") {
-                    CurrentStatus.setNewStatus(Status.LOADING)
+                    setNewStatus(Status.LOADING)
                     LocationService.startTracking(applicationContext)
                 }
             }
@@ -76,40 +99,40 @@ class TrackerApp : Application(),
         checker()
     }
 
+    override fun onTerminate() {
+        super.onTerminate()
+        job.cancel()
+    }
+
     private fun checker() {
-        handler.postDelayed(Runnable {
-            handler.postDelayed(tempThread!!, delay)
-            when (CurrentStatus.status.value) {
+        status.onEach { status: Status ->
+            when (status) {
                 Status.LOADING -> {
                     if (!Utility.checkGps(locationManager)) {
-                        CurrentStatus.setNewStatus(Status.GPS_IS_OFF)
+                        setNewStatus(Status.GPS_IS_OFF)
                     }
                 }
 
                 Status.GPS_IS_OFF -> {
                     if (Utility.checkGps(locationManager)) {
-                        CurrentStatus.setNewStatus(Status.LOADING)
+                        setNewStatus(Status.LOADING)
                     }
                 }
 
                 Status.HAS_NO_PERMISSIONS -> {
-                    if (showAlertDialog.value) return@Runnable
                     if (!Utility.hasLocationPermission(applicationContext)) {
                         showAlertDialog.value = true
                         LocationService.stopTracking(applicationContext)
                     } else {
-                        CurrentStatus.setNewStatus(Status.LOADING)
+                        setNewStatus(Status.LOADING)
                         LocationService.startTracking(applicationContext)
                     }
                 }
 
-                else -> {
-                    return@Runnable
-                }
+                else -> {} // not needed
             }
-        }.also {
-            tempThread = it
-        }, delay)
+
+        }
     }
 
     override fun getWorkManagerConfiguration() =

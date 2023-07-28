@@ -16,8 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.viewmodel.AuthViewModel
@@ -28,13 +26,8 @@ import com.kdan.map.viewmodel.MapViewModel
 @Composable
 fun FragmentSettings(
     navController: NavHostController,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    authViewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
-    mapViewModel: MapViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    authViewModel: AuthViewModel,
+    mapViewModel: MapViewModel,
 ) {
     val lazyColumnState = rememberLazyListState()
     Surface(
@@ -76,9 +69,7 @@ fun FragmentSettings(
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                DateTimePickers(
-                    viewModelStoreOwner
-                )
+                DateTimePickers(mapViewModel)
                 TextButton(
                     onClick = {
                         navController.navigate(RoutesMap.fragmentMap)

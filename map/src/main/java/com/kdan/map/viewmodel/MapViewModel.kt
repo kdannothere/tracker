@@ -1,6 +1,5 @@
 package com.kdan.map.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,12 +13,15 @@ import com.kdan.coredatabase.markmap.MarkMap
 import com.kdan.coredatabase.markmap.MarkMapRepository
 import com.kdan.map.utility.Utility
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val repository: MarkMapRepository,
+    private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val remoteDb = Firebase.firestore
@@ -53,14 +55,14 @@ class MapViewModel @Inject constructor(
 
 
     init {
-        Utility.getInitialTimeRange().run {
+        Utility.getInitialTimeRange().apply {
             timeFrom = first
             timeTo = second
         }
     }
 
     fun updateAllMarks(email: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherIO) {
             allMarks.addAll(
                 elements = repository.getMarks(email)
             )
@@ -72,7 +74,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun updateMarksInTimeRange() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherIO) {
             val newList = mutableListOf<MarkMap>()
 
             val range = if (timeFrom > timeTo) {
@@ -89,8 +91,8 @@ class MapViewModel @Inject constructor(
     }
 
     fun loadMarksFromCloud(email: String) {
-        if (email.isBlank()) return
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherIO) {
+            if (email.isBlank()) return@launch
             remoteDb.collection(AppDatabase.tableRemoteMarks)
                 .whereEqualTo("email", email)
                 .get()
@@ -102,21 +104,18 @@ class MapViewModel @Inject constructor(
                             latitude = mark.get("latitude").toString(),
                             longitude = mark.get("longitude").toString()
                         )
-                        viewModelScope.launch {
+                        viewModelScope.launch(dispatcherIO) {
                             repository.upsertMark(newMark)
                         }
 
                     }
-                }
-                .addOnFailureListener {
-                    Log.d("kdanMap", "loadMarksFromCloud() failed")
                 }
         }
         updateAllMarks(email)
     }
 
     fun clearLocalMarks() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherIO) {
             allMarks.forEach { mark ->
                 repository.deleteMark(mark)
             }

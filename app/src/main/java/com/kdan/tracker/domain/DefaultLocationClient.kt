@@ -7,7 +7,7 @@ import android.location.LocationManager
 import android.os.Looper
 import com.google.android.gms.location.*
 import com.kdan.tracker.BuildConfig
-import com.kdan.tracker.utility.CurrentStatus
+import com.kdan.tracker.TrackerApp
 import com.kdan.tracker.utility.Status
 import com.kdan.tracker.utility.Utility
 import kotlinx.coroutines.channels.awaitClose
@@ -27,13 +27,13 @@ class DefaultLocationClient(
         return callbackFlow {
 
             if (!Utility.hasLocationPermission(context)) {
-                CurrentStatus.setNewStatus(Status.HAS_NO_PERMISSIONS)
+                TrackerApp.setNewStatus(Status.HAS_NO_PERMISSIONS)
                 throw LocationClient.LocationException("Missing location permission")
             }
             val locationManager =
                 context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             if (!Utility.checkGps(locationManager)) {
-                CurrentStatus.setNewStatus(Status.GPS_IS_OFF)
+                TrackerApp.setNewStatus(Status.GPS_IS_OFF)
                 throw LocationClient.LocationException("GPS is disabled")
             }
             val request = createRequest()

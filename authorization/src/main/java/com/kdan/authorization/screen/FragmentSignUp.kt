@@ -1,6 +1,5 @@
 package com.kdan.authorization.screen
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,15 +13,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.google.firebase.auth.FirebaseAuth
-import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.R.string
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
+import com.kdan.authorization.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 
@@ -30,11 +25,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FragmentSignUp(
     navController: NavHostController,
-    context: Context,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    viewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    viewModel: AuthViewModel,
 ) {
     val emailState = remember { mutableStateOf(TextFieldValue("")) }
     val password = remember { mutableStateOf(TextFieldValue("")) }
@@ -92,19 +83,13 @@ fun FragmentSignUp(
                     )
                 )
                 if (viewModel.showDialog.value) {
-                    ShowAlertDialog(context, viewModelStoreOwner)
+                    ShowAlertDialog(viewModel)
                 }
                 Spacer(modifier = Modifier.height(40.dp))
                 TextButton(
                     onClick = {
                         scope.launch {
-                            signUp(
-                                auth = viewModel.auth,
-                                email = viewModel.email,
-                                password = viewModel.password,
-                                showDialog = viewModel.showDialog,
-                                messageCodes = viewModel.messageCodes
-                            )
+                            signUp(viewModel)
                             keyboard?.hide()
                         }
                     }) {
@@ -123,25 +108,23 @@ fun FragmentSignUp(
 }
 
 private fun signUp(
-    auth: FirebaseAuth,
-    email: String,
-    password: String,
-    showDialog: MutableState<Boolean>,
-    messageCodes: MutableList<Int>,
+    viewModel: AuthViewModel
 ) {
-    val isEmailOkay = Utility.checkEmail(email, messageCodes)
-    val isPasswordOkay = Utility.checkPassword(password, messageCodes)
-    if (!isEmailOkay || !isPasswordOkay) {
-        Utility.turnOnDialog(showDialog)
-        return
-    }
-    auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Utility.addMessageCode(string.message_success, messageCodes)
-            } else {
-                Utility.addMessageCode(string.message_failure, messageCodes)
-            }
+    viewModel.apply {
+        val isEmailOkay = Utility.checkEmail(email, messageCodes)
+        val isPasswordOkay = Utility.checkPassword(password, messageCodes)
+        if (!isEmailOkay || !isPasswordOkay) {
             Utility.turnOnDialog(showDialog)
+            return
         }
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Utility.addMessageCode(string.message_success, messageCodes)
+                } else {
+                    Utility.addMessageCode(string.message_failure, messageCodes)
+                }
+                Utility.turnOnDialog(showDialog)
+            }
+    }
 }

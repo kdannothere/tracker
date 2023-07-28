@@ -1,6 +1,5 @@
 package com.kdan.authorization.screen
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,26 +13,19 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.authorization.R.string
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.utility.Utility
+import com.kdan.authorization.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FragmentRestorePassword(
     navController: NavHostController,
-    context: Context,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    viewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    viewModel: AuthViewModel,
 ) {
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
@@ -67,18 +59,13 @@ fun FragmentRestorePassword(
                     )
                 )
                 if (viewModel.showDialog.value) {
-                    ShowAlertDialog(context, viewModelStoreOwner)
+                    ShowAlertDialog(viewModel)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 TextButton(
                     onClick = {
                         scope.launch {
-                            restorePassword(
-                                auth = viewModel.auth,
-                                email = viewModel.email,
-                                showDialog = viewModel.showDialog,
-                                messageCodes = viewModel.messageCodes
-                            )
+                            restorePassword(viewModel)
                             keyboard?.hide()
                         }
                     }) {
@@ -96,24 +83,21 @@ fun FragmentRestorePassword(
     }
 }
 
-private fun restorePassword(
-    auth: FirebaseAuth,
-    email: String,
-    showDialog: MutableState<Boolean>,
-    messageCodes: MutableList<Int>,
-) {
-    val isEmailOkay = Utility.checkEmail(email, messageCodes)
-    if (!isEmailOkay) {
-        Utility.turnOnDialog(showDialog)
-        return
-    }
-    auth.sendPasswordResetEmail(email)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Utility.addMessageCode(string.message_success, messageCodes)
-            } else {
-                Utility.addMessageCode(string.message_failure, messageCodes)
-            }
+private fun restorePassword(viewModel: AuthViewModel) {
+    viewModel.apply {
+        val isEmailOkay = Utility.checkEmail(email, messageCodes)
+        if (!isEmailOkay) {
             Utility.turnOnDialog(showDialog)
+            return
         }
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Utility.addMessageCode(string.message_success, messageCodes)
+                } else {
+                    Utility.addMessageCode(string.message_failure, messageCodes)
+                }
+                Utility.turnOnDialog(showDialog)
+            }
+    }
 }

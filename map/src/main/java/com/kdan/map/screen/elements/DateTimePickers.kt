@@ -2,7 +2,6 @@ package com.kdan.map.screen.elements
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.util.Log
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.layout.Arrangement
@@ -20,20 +19,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
-import com.kdan.map.utility.Utility
 import com.kdan.map.viewmodel.MapViewModel
 import java.util.Calendar
 import java.util.Date
+
 // be careful with date that you save and date that you show
 // first month has index 0, not 1
 @Composable
 fun DateTimePickers(
-    viewModelStoreOwner: ViewModelStoreOwner,
-    mapViewModel: MapViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    mapViewModel: MapViewModel,
 ) {
     val currentYear: Int
     val currentMonth: Int
@@ -45,14 +39,16 @@ fun DateTimePickers(
     val calendar = Calendar.getInstance()
     val fakeCalendar = Calendar.getInstance() // to set and save date and time
 
-    currentYear = calendar.get(Calendar.YEAR)
-    currentMonth = calendar.get(Calendar.MONTH)
-    currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+    calendar.apply {
+        currentYear = get(Calendar.YEAR)
+        currentMonth = get(Calendar.MONTH)
+        currentDay = get(Calendar.DAY_OF_MONTH)
 
-    currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-    currentMinute = calendar.get(Calendar.MINUTE)
+        currentHour = get(Calendar.HOUR_OF_DAY)
+        currentMinute = get(Calendar.MINUTE)
+    }
 
-    mapViewModel.run {
+    mapViewModel.apply {
         if (textDateFrom.value.isBlank()) {
 
             fromDay = currentDay - 1
@@ -79,15 +75,17 @@ fun DateTimePickers(
     val datePickerDialogFrom = DatePickerDialog(
         LocalContext.current,
         { _: DatePicker, newYear: Int, newMonth: Int, newDay: Int ->
-            mapViewModel.run {
+            mapViewModel.apply {
                 textDateFrom.value = "$newDay/${newMonth + 1}/$newYear"
                 fromYear = newYear
                 fromMonth = newMonth
                 fromDay = newDay
-                fakeCalendar.set(
-                    newYear, newMonth, newDay,
-                    fromHour, fromMinute,
-                )
+                fakeCalendar.apply {
+                    set(
+                        newYear, newMonth, newDay,
+                        fromHour, fromMinute,
+                    )
+                }
                 timeFrom = fakeCalendar.timeInMillis
                 updateMarksInTimeRange()
             }
@@ -112,7 +110,7 @@ fun DateTimePickers(
     val datePickerDialogTo = DatePickerDialog(
         LocalContext.current,
         { _: DatePicker, newYear: Int, newMonth: Int, newDay: Int ->
-            mapViewModel.run {
+            mapViewModel.apply {
                 textDateTo.value = "$newDay/${newMonth + 1}/$newYear"
                 toYear = newYear
                 toMonth = newMonth

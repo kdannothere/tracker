@@ -13,18 +13,17 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import com.kdan.authorization.navigation.RoutesAuth
 import com.kdan.authorization.viewmodel.AuthViewModel
 import com.kdan.map.navigation.RoutesMap
-import com.kdan.tracker.MainActivity
 import com.kdan.tracker.R
 import com.kdan.tracker.TrackerApp
 import com.kdan.tracker.domain.LocationService
@@ -35,26 +34,24 @@ import com.kdan.tracker.utility.Utility
 @Composable
 fun FragmentTracker(
     navController: NavHostController,
-    applicationContext: Context,
-    activity: MainActivity,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    authViewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    authViewModel: AuthViewModel,
 ) {
-    TrackerApp.email = authViewModel.getUserEmail()
+    LaunchedEffect(Unit) {
+        TrackerApp.email = authViewModel.getUserEmail()
+    }
+    val context = LocalContext.current
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        if (TrackerApp.showAlertDialog.value) ShowAlertDialog(activity)
+        if (TrackerApp.showAlertDialog.value) ShowAlertDialog()
         Row(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.Top
         ) {
             TextButton(onClick = {
                 CurrentStatus.isLoggingOut = true
-                LocationService.stopTracking(applicationContext)
+                LocationService.stopTracking(context)
                 authViewModel.logOut()
                 navController.navigate(RoutesAuth.fragmentSignIn)
             }) {
@@ -70,10 +67,10 @@ fun FragmentTracker(
         ) {
             ShowStatusText()
             Spacer(modifier = Modifier.height(30.dp))
-            ButtonStartStop(applicationContext)
+            ButtonStartStop()
             Spacer(modifier = Modifier.height(30.dp))
             Button(onClick = {
-                if (Utility.hasLocationPermission(applicationContext)) {
+                if (Utility.hasLocationPermission(context)) {
                     navController.navigate(RoutesMap.fragmentMap)
                 } else TrackerApp.showAlertDialog.value = true
             }) {
@@ -106,9 +103,8 @@ private fun ShowStatusText() {
 }
 
 @Composable
-private fun ButtonStartStop(
-    applicationContext: Context,
-) {
+private fun ButtonStartStop() {
+    val context = LocalContext.current
     val textOfButton = if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
         CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
     ) {
@@ -118,7 +114,7 @@ private fun ButtonStartStop(
     }
     Button(
         onClick = {
-            runTracker(applicationContext)
+            runTracker(context)
         }) {
         Text(
             text = textOfButton,
@@ -127,12 +123,12 @@ private fun ButtonStartStop(
     }
 }
 
-fun runTracker(applicationContext: Context) {
+fun runTracker(context: Context) {
     if (CurrentStatus.status.value == Status.TRACKER_IS_OFF ||
         CurrentStatus.status.value == Status.HAS_NO_PERMISSIONS
     ) {
-        LocationService.startTracking(applicationContext)
+        LocationService.startTracking(context)
     } else {
-        LocationService.stopTracking(applicationContext)
+        LocationService.stopTracking(context)
     }
 }

@@ -1,25 +1,20 @@
 package com.kdan.authorization.screen
 
-import android.content.Context
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import com.kdan.authorization.R
 import com.kdan.authorization.utility.Utility
 import com.kdan.authorization.viewmodel.AuthViewModel
 
 @Composable
 fun ShowAlertDialog(
-    context: Context,
-    viewModelStoreOwner: ViewModelStoreOwner,
-    viewModel: AuthViewModel = hiltViewModel(
-        viewModelStoreOwner = viewModelStoreOwner
-    ),
+    viewModel: AuthViewModel,
 ) {
+    val context = LocalContext.current
     AlertDialog(
         title = {
             Text(text = stringResource(id = R.string.dialog_title))
