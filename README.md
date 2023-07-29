@@ -1,5 +1,3 @@
-Here is a more professional version of the README.md text:
-
 # Tracker
 
 Tracker is an Android application that allows you to track locations and send them to a Firebase/Cloud Firestore server. The app also displays collected locations of authenticated users on a map.
